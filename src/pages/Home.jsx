@@ -16,6 +16,7 @@ export default function Home() {
   const { user } = useAuth();
 
   const interests = user?.interests || [];
+  const userId = user?._id || user?.id;
 
   /* ---------------- FETCH PRODUCTS ---------------- */
   useEffect(() => {
@@ -37,9 +38,40 @@ export default function Home() {
     return () => (active = false);
   }, []);
 
+  /* ---------------- FETCH WISHLIST IDS ---------------- */
+  const [wishlistIds, setWishlistIds] = useState([]);
+
+  useEffect(() => {
+    if (!userId) {
+      setWishlistIds([]);
+      return;
+    }
+
+    const loadWishlist = () => {
+      api
+        .get(`/users/${userId}/wishlist`)
+        .then((res) => {
+          const ids = res.data.map((p) => p._id || p.id);
+          setWishlistIds(ids);
+        })
+        .catch(() => {});
+    };
+
+    loadWishlist();
+
+    // 🔥 keep in sync after add/remove
+    window.addEventListener("wishlist-updated", loadWishlist);
+
+    return () =>
+      window.removeEventListener("wishlist-updated", loadWishlist);
+  }, [userId]);
+
   /* ---------------- CATEGORY LIST ---------------- */
   const categories = useMemo(() => {
-    return ["All", ...Array.from(new Set(products.map((p) => p.category || "Other")))];
+    return [
+      "All",
+      ...Array.from(new Set(products.map((p) => p.category || "Other"))),
+    ];
   }, [products]);
 
   /* ---------------- FILTER RESULTS ---------------- */
@@ -67,7 +99,7 @@ export default function Home() {
   return (
     <div className="container home-wide">
 
-      {/* ⭐ RECOMMENDED SECTION (ONLY ONCE) */}
+      {/* ⭐ RECOMMENDED SECTION */}
       {recommended.length > 0 && (
         <>
           <h2 className="section-title">Recommended for You ⭐</h2>
@@ -76,13 +108,16 @@ export default function Home() {
             {recommended.map((p) => (
               <ProductCard
                 key={p._id || p.id}
-                product={p}
+                product={{
+                  ...p,
+                  inWishlist: wishlistIds.includes(p._id || p.id),
+                }}
                 onAdd={addToCart}
               />
             ))}
           </div>
 
-          {/* ⭐ FILTER BAR BELOW RECOMMENDED */}
+          {/* FILTER BAR */}
           <div
             className="card filter-bar"
             style={{
@@ -100,7 +135,6 @@ export default function Home() {
               marginRight: "auto",
             }}
           >
-            {/* Search */}
             <input
               className="auth-input"
               placeholder="Search products..."
@@ -113,7 +147,6 @@ export default function Home() {
               }}
             />
 
-            {/* Category */}
             <select
               className="auth-input"
               value={category}
@@ -129,11 +162,12 @@ export default function Home() {
               ))}
             </select>
 
-            {/* Price Slider */}
             <div style={{ width: "260px" }}>
               <label style={{ fontWeight: 700 }}>
                 Max Price:{" "}
-                {maxPrice === 100000 ? "No limit" : `₹${maxPrice.toLocaleString()}`}
+                {maxPrice === 100000
+                  ? "No limit"
+                  : `₹${maxPrice.toLocaleString()}`}
               </label>
 
               <input
@@ -161,7 +195,10 @@ export default function Home() {
           {filtered.map((p) => (
             <ProductCard
               key={p._id || p.id}
-              product={p}
+              product={{
+                ...p,
+                inWishlist: wishlistIds.includes(p._id || p.id),
+              }}
               onAdd={(prod) => addToCart(prod)}
             />
           ))}
