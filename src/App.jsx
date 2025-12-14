@@ -91,24 +91,27 @@ useEffect(() => {
 
   /* ------------------ CART FUNCTIONS ------------------ */
   const addToCart = (product, qty = 1) => {
-    setCart((prev) => {
-      const exists = prev.find(
-        (c) => c.product._id === product._id
+  const pid = getProductId(product);
+
+  setCart((prev) => {
+    const exists = prev.find(
+      (c) => getProductId(c.product) === pid
+    );
+
+    if (exists) {
+      return prev.map((c) =>
+        getProductId(c.product) === pid
+          ? { ...c, qty: c.qty + qty }
+          : c
       );
+    }
 
-      if (exists) {
-        return prev.map((c) =>
-          c.product._id === product._id
-            ? { ...c, qty: c.qty + qty }
-            : c
-        );
-      }
+    return [...prev, { product, qty }];
+  });
 
-      return [...prev, { product, qty }];
-    });
+  setCartOpen(true);
+};
 
-    setCartOpen(true);
-  };
 
   const changeQty = (productId, qty) => {
     setCart((prev) =>
