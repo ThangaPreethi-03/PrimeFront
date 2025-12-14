@@ -95,6 +95,11 @@
 .product-meta { display:flex; justify-content:space-between; align-items:center; gap:8px; }
 .product-price { font-weight:900; color:#1e3a8a; } /* deep blue price for contrast */
 
+.product-image-wrap {
+  overflow: hidden;
+}
+
+
 /* add small circular add button */
 .btn.icon {
   padding:8px 10px; border-radius:10px; background: linear-gradient(180deg,var(--accent), #ff6f00);
