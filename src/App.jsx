@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { Routes, Route } from "react-router-dom";
-
+import LandingPage from "./pages/LandingPage";
 import Home from "./pages/Home";
 import ProductPage from "./pages/ProductPage";
 import Login from "./pages/Login";
@@ -16,6 +16,9 @@ import BillPage from "./pages/BillPage";
 import OrderHistory from "./pages/OrderHistory";
 import OrderTracking from "./pages/OrderTracking";
 import Chatbot from "./components/Chatbot";
+import Wishlist from "./pages/Wishlist";
+import Profile from "./pages/Profile";
+import PaymentPage from "./pages/Payment";
 
 import Navbar from "./components/Navbar";
 import CartSidebar from "./components/CartSidebar";
@@ -35,67 +38,69 @@ export const useCart = () => useContext(CartContext);
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
-/* ---------- UNIVERSAL HELPERS ---------- */
-const getProductId = (p) => String(p?._id || p?.id || "");
-const getUserId = (u) =>
-  String(u?.id || u?._id || u?.userId || u?.email || "");
-
 /* ------------------ APP ------------------ */
 export default function App() {
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
 
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [token, setToken] = useState(localStorage.getItem("token"));
+const [user, setUser] = useState(null);
 
-  const [user, setUser] = useState(() => {
-    try {
-      return token ? jwtDecode(token) : null;
-    } catch {
-      return null;
-    }
-  });
+useEffect(() => {
+  if (!token) {
+    setUser(null);
+    return;
+  }
 
-  /* ---------- LOAD CART AFTER LOGIN ---------- */
+  try {
+    const decoded = JSON.parse(
+      atob(token.split(".")[1])
+    );
+
+    // ✅ IMPORTANT FIX HERE
+    setUser({
+      id: decoded.id,          // ← THIS WAS THE BUG
+      name: decoded.name,
+      email: decoded.email,
+      interests: decoded.interests || []
+    });
+
+    api.defaults.headers.common.Authorization =
+      `Bearer ${token}`;
+  } catch (err) {
+    console.error("Invalid token", err);
+    localStorage.removeItem("token");
+    setUser(null);
+  }
+}, [token]);
+
+
+  /* ------------------ CART PERSISTENCE ------------------ */
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
-
-      try {
-        const decoded = jwtDecode(token);
-        setUser(decoded);
-
-        const uid = getUserId(decoded);
-        const storedCart = loadCartFromStorage(uid);
-        setCart(storedCart || []);
-      } catch {
-        setUser(null);
-        setCart([]);
-      }
-    } else {
-      localStorage.removeItem("token");
-      setUser(null);
-      setCart([]);
+    if (user?.userId) {
+      const stored = loadCartFromStorage(user.userId);
+      setCart(stored || []);
     }
-  }, [token]);
+  }, [user?.userId]);
 
-  /* ---------- SAVE CART PER USER ---------- */
   useEffect(() => {
-    if (user) {
-      const uid = getUserId(user);
-      saveCartToStorage(uid, cart);
+    if (user?.userId) {
+      saveCartToStorage(user.userId, cart);
     }
-  }, [cart, user]);
+  }, [cart, user?.userId]);
 
   /* ------------------ CART FUNCTIONS ------------------ */
   const addToCart = (product, qty = 1) => {
-    const pid = getProductId(product);
-
     setCart((prev) => {
-      const exists = prev.find((c) => getProductId(c.product) === pid);
+      const exists = prev.find(
+        (c) => c.product._id === product._id
+      );
 
       if (exists) {
         return prev.map((c) =>
-          getProductId(c.product) === pid ? { ...c, qty: c.qty + qty } : c
+          c.product._id === product._id
+            ? { ...c, qty: c.qty + qty }
+            : c
         );
       }
 
@@ -106,13 +111,11 @@ export default function App() {
   };
 
   const changeQty = (productId, qty) => {
-    const pid = String(productId);
-
     setCart((prev) =>
       prev
         .map((c) =>
-          getProductId(c.product) === pid
-            ? { ...c, qty: Number(qty) }
+          c.product._id === productId
+            ? { ...c, qty }
             : c
         )
         .filter((c) => c.qty > 0)
@@ -120,16 +123,16 @@ export default function App() {
   };
 
   const removeFromCart = (productId) => {
-    const pid = String(productId);
-    setCart((prev) => prev.filter((c) => getProductId(c.product) !== pid));
+    setCart((prev) =>
+      prev.filter((c) => c.product._id !== productId)
+    );
   };
 
   const clearCart = () => setCart([]);
 
-  /* ---------- CART STATS ---------- */
-  const cartCount = cart.reduce((sum, c) => sum + c.qty, 0);
+  const cartCount = cart.reduce((s, c) => s + c.qty, 0);
   const cartTotal = cart.reduce(
-    (sum, c) => sum + c.qty * c.product.price,
+    (s, c) => s + c.qty * c.product.price,
     0
   );
 
@@ -148,13 +151,17 @@ export default function App() {
     [cart, cartOpen, cartCount, cartTotal]
   );
 
-  /* ------------------ AUTH ------------------ */
-  const login = (token) => setToken(token);
+  /* ------------------ AUTH ACTIONS ------------------ */
+  const login = (tok) => {
+    localStorage.setItem("token", tok);
+    setToken(tok);
+  };
 
   const logout = () => {
-    const uid = getUserId(user);
-    clearCartStorage(uid);
+    if (user?.userId) clearCartStorage(user.userId);
+    localStorage.removeItem("token");
     setToken(null);
+    setUser(null);
     setCart([]);
   };
 
@@ -163,11 +170,7 @@ export default function App() {
     [token, user]
   );
 
-  /* ---------- INITIAL BACKEND CHECK ---------- */
-  useEffect(() => {
-    api.get("/products").catch(() => {});
-  }, []);
-
+  /* ------------------ APP UI ------------------ */
   return (
     <AuthContext.Provider value={authValue}>
       <CartContext.Provider value={cartValue}>
@@ -176,10 +179,17 @@ export default function App() {
 
           <main className="page-container">
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/shop" element={<Home />} />
               <Route path="/product/:id" element={<ProductPage />} />
+
               <Route path="/login" element={<Login onLogin={login} />} />
               <Route path="/register" element={<Register onRegister={login} />} />
+
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/payment" element={<PaymentPage />} />
+
               <Route path="/checkout-success" element={<CheckoutSuccess />} />
               <Route path="/bill" element={<BillPage />} />
               <Route path="/orders" element={<OrderHistory />} />
@@ -195,6 +205,7 @@ export default function App() {
             removeFromCart={removeFromCart}
             clearCart={clearCart}
           />
+
           <Chatbot />
 
           <footer className="footer">
