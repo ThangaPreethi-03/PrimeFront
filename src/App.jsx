@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { Routes, Route } from "react-router-dom";
+
 import LandingPage from "./pages/LandingPage";
 import Home from "./pages/Home";
 import ProductPage from "./pages/ProductPage";
@@ -15,13 +16,13 @@ import CheckoutSuccess from "./pages/CheckoutSuccess";
 import BillPage from "./pages/BillPage";
 import OrderHistory from "./pages/OrderHistory";
 import OrderTracking from "./pages/OrderTracking";
-import Chatbot from "./components/Chatbot";
 import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
 import PaymentPage from "./pages/Payment";
 
 import Navbar from "./components/Navbar";
 import CartSidebar from "./components/CartSidebar";
+import Chatbot from "./components/Chatbot";
 
 import api from "./services/api";
 import {
@@ -29,7 +30,6 @@ import {
   saveCartToStorage,
   clearCartStorage,
 } from "./services/cart";
-import { jwtDecode } from "jwt-decode";
 
 /* ------------------ CONTEXT SETUP ------------------ */
 const CartContext = createContext();
@@ -38,48 +38,48 @@ export const useCart = () => useContext(CartContext);
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
+/* ------------------ HELPERS ------------------ */
+const getProductId = (p) => String(p?._id || p?.id || "");
+
 /* ------------------ APP ------------------ */
 export default function App() {
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
 
   const [token, setToken] = useState(localStorage.getItem("token"));
-const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
 
-useEffect(() => {
-  if (!token) {
-    setUser(null);
-    return;
-  }
+  /* ------------------ AUTH INIT ------------------ */
+  useEffect(() => {
+    if (!token) {
+      setUser(null);
+      return;
+    }
 
-  try {
-    const decoded = JSON.parse(
-      atob(token.split(".")[1])
-    );
+    try {
+      const decoded = JSON.parse(atob(token.split(".")[1]));
 
-    // ✅ IMPORTANT FIX HERE
-    setUser({
-      id: decoded.id,          // ← THIS WAS THE BUG
-      name: decoded.name,
-      email: decoded.email,
-      interests: decoded.interests || []
-    });
+      // ✅ CRITICAL FIX: CONSISTENT userId
+      setUser({
+        userId: decoded.id,
+        name: decoded.name,
+        email: decoded.email,
+        interests: decoded.interests || [],
+      });
 
-    api.defaults.headers.common.Authorization =
-      `Bearer ${token}`;
-  } catch (err) {
-    console.error("Invalid token", err);
-    localStorage.removeItem("token");
-    setUser(null);
-  }
-}, [token]);
-
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    } catch (err) {
+      console.error("Invalid token", err);
+      localStorage.removeItem("token");
+      setUser(null);
+    }
+  }, [token]);
 
   /* ------------------ CART PERSISTENCE ------------------ */
   useEffect(() => {
     if (user?.userId) {
-      const stored = loadCartFromStorage(user.userId);
-      setCart(stored || []);
+      const storedCart = loadCartFromStorage(user.userId);
+      setCart(storedCart || []);
     }
   }, [user?.userId]);
 
@@ -91,34 +91,34 @@ useEffect(() => {
 
   /* ------------------ CART FUNCTIONS ------------------ */
   const addToCart = (product, qty = 1) => {
-  const pid = getProductId(product);
+    const pid = getProductId(product);
 
-  setCart((prev) => {
-    const exists = prev.find(
-      (c) => getProductId(c.product) === pid
-    );
-
-    if (exists) {
-      return prev.map((c) =>
-        getProductId(c.product) === pid
-          ? { ...c, qty: c.qty + qty }
-          : c
+    setCart((prev) => {
+      const exists = prev.find(
+        (c) => getProductId(c.product) === pid
       );
-    }
 
-    return [...prev, { product, qty }];
-  });
+      if (exists) {
+        return prev.map((c) =>
+          getProductId(c.product) === pid
+            ? { ...c, qty: c.qty + qty }
+            : c
+        );
+      }
 
-  setCartOpen(true);
-};
+      return [...prev, { product, qty }];
+    });
 
+    setCartOpen(true);
+  };
 
   const changeQty = (productId, qty) => {
+    const pid = String(productId);
     setCart((prev) =>
       prev
         .map((c) =>
-          c.product._id === productId
-            ? { ...c, qty }
+          getProductId(c.product) === pid
+            ? { ...c, qty: Number(qty) }
             : c
         )
         .filter((c) => c.qty > 0)
@@ -126,16 +126,18 @@ useEffect(() => {
   };
 
   const removeFromCart = (productId) => {
+    const pid = String(productId);
     setCart((prev) =>
-      prev.filter((c) => c.product._id !== productId)
+      prev.filter((c) => getProductId(c.product) !== pid)
     );
   };
 
   const clearCart = () => setCart([]);
 
-  const cartCount = cart.reduce((s, c) => s + c.qty, 0);
+  /* ------------------ CART STATS ------------------ */
+  const cartCount = cart.reduce((sum, c) => sum + c.qty, 0);
   const cartTotal = cart.reduce(
-    (s, c) => s + c.qty * c.product.price,
+    (sum, c) => sum + c.qty * c.product.price,
     0
   );
 
