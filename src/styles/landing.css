@@ -1,0 +1,271 @@
+/* ============================================================
+   Landing V4 — Ultra premium, bright + neon 3D + particles
+   Place background.jpg and girls.png in: src/assets/
+   Use <LandingPage /> as root "/" route. Keep Home included below.
+   ============================================================ */
+
+/* ---------- viewport + smooth snap ---------- */
+:root {
+  --glass-bg: rgba(255,255,255,0.34);
+  --glass-border: rgba(255,255,255,0.5);
+  --accent: #ff7a00;
+  --accent-dark: #ff5100;
+  --text-dark: #111;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+.landing-snap-viewport {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+}
+
+/* Canvas (particles) sits under everything */
+.landing-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.85;
+}
+
+/* Background image with slow zoom (camera) */
+.landing-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.05) contrast(1.03);
+  transform-origin: center;
+  z-index: 0;
+  animation: bgZoom 30s linear infinite alternate;
+  will-change: transform;
+}
+@keyframes bgZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.06); }
+}
+
+/* HERO container (center content) */
+.landing-hero {
+  position: relative;
+  z-index: 5;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+/* Glass card - bright premium */
+.glass-card {
+  width: 92%;
+  max-width: 1200px;
+  min-height: 64vh;
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 36px;
+  border-radius: 28px;
+  backdrop-filter: blur(12px) saturate(1.2);
+  background: linear-gradient(135deg, rgba(255,255,255,0.45), rgba(255,255,255,0.28));
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 20px 60px rgba(30,30,30,0.12), 0 4px 18px rgba(0,0,0,0.08);
+  transform: translateZ(0);
+  transition: transform 300ms ease;
+  overflow: visible;
+}
+
+/* ---------------- LEFT ---------------- */
+.left-section {
+  width: 52%;
+  padding-right: 12px;
+}
+
+/* Neon 3D title */
+.neon-title {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0;
+  line-height: 0.85;
+  font-weight: 900;
+  letter-spacing: 2px;
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(40px, 6.5vw, 92px);
+  transform-style: preserve-3d;
+  text-rendering: optimizeLegibility;
+  opacity: 0;
+  animation: titleSlidePop 2.2s cubic-bezier(.22, .8, .25, 1) forwards 0.4s;
+
+}
+/* PRIME black with subtle 3D emboss */
+.neon-prime {
+  color: #000;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.6),
+    0 6px 14px rgba(0,0,0,0.15);
+  transform: translateZ(12px) rotateX(0.6deg);
+}
+
+/* SHOP neon gradient + glow */
+.neon-shop {
+  color: var(--accent);
+  background: linear-gradient(90deg, #ffd89a, #ff7a00 60%, #ff4b00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 0 8px rgba(255,140,40,0.65),
+    0 0 28px rgba(255,110,20,0.45),
+    0 6px 30px rgba(0,0,0,0.18);
+  transform: translateZ(6px);
+  filter: drop-shadow(0 10px 30px rgba(255,120,10,0.12));
+}
+
+/* Slogan - lighter, readable on bright bg */
+.hero-slogan {
+  margin-top: 16px;
+  font-size: clamp(14px, 1.3vw, 22px);
+  color: rgba(20,20,20,0.92);
+  max-width: 680px;
+  line-height: 1.45;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+}
+
+/* CTA row */
+.cta-row {
+  margin-top: 26px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.cta-primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+  border: none;
+  color: white;
+  padding: 14px 34px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(255,120,0,0.18), 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+.cta-primary:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 18px 40px rgba(255,120,0,0.28); }
+
+.cta-ghost {
+  color: #333;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  opacity: 0.95;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* ---------------- RIGHT ---------------- */
+.right-section {
+  width: 44%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+}
+
+/* bright subtle glow ring behind the girl */
+.ring {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,200,120,0.55), rgba(255,120,30,0.18) 40%, transparent 60%);
+  filter: blur(36px);
+  z-index: 2;
+  transform: translateY(20px);
+}
+
+/* Girl image */
+.girl-img {
+  width: 86%;
+  max-width: 520px;
+  z-index: 4;
+  transform: translateY(220px) scale(0.94);
+  opacity: 0;
+  animation: girlRiseV4 1.5s cubic-bezier(.22,.9,.24,1) forwards 0.25s;
+  will-change: transform, opacity;
+}
+
+/* float gently after arrival */
+@keyframes girlFloat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+  100% { transform: translateY(0); }
+}
+@keyframes girlRiseV4 {
+  0% { transform: translateY(300px) scale(0.9); opacity: 0; }
+  70% { transform: translateY(-6px) scale(1.03); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.girl-img {
+  animation: 
+    girlRiseV4 2.8s cubic-bezier(.22,.7,.24,1) forwards 0.4s,
+    girlFloat 8.5s ease-in-out 3s infinite;
+}
+
+/* Card subtle entrance */
+@keyframes cardIn {
+  from { transform: translateY(28px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+/* PRIME SHOP entrance animation */
+@keyframes titleSlidePop {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+
+/* ---------- responsive ---------- */
+@media (max-width: 1000px) {
+  .glass-card { flex-direction: column-reverse; gap: 18px; align-items: center; padding: 32px; min-height: 60vh; }
+  .left-section, .right-section { width: 100%; }
+  .right-section { margin-top: 8px; }
+  .ring { display: none; }
+  .girl-img { width: 68%; max-width: 360px; }
+  .neon-title { justify-content: center; font-size: clamp(30px, 8vw, 64px); }
+  .hero-slogan { text-align: center; max-width: 620px; }
+}
+
+/* small mobile */
+@media (max-width: 520px) {
+  .girl-img { width: 84%; }
+  .hero-slogan { font-size: 15px; }
+  .cta-primary { padding: 12px 22px; font-size: 15px; }
+}
+
+/* ---------- below site (Home) spacing ---------- */
+.below-site {
+  scroll-snap-align: start;
+  background: #fff;
+}
