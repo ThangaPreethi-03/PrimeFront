@@ -2,7 +2,7 @@ const FALLBACK_PRODUCTS = [
   {
     id: 1,
     name: "Apple Smart Watch",
-    price: 19999,
+    price: 18999,
     category: "Wearables",
     img: "/images/watch.jpg",
     description: "Premium smartwatch with health tracking and long battery life."
@@ -10,15 +10,15 @@ const FALLBACK_PRODUCTS = [
   {
     id: 2,
     name: "Sony WH-1000XM4 Headphones",
-    price: 29999,
+    price: 20999,
     category: "Audio",
     img: "/images/headphone.jpg",
     description: "Industry-leading noise cancellation and superior sound."
   },
   {
     id: 3,
-    name: "JBL Bluetooth Speaker",
-    price: 6999,
+    name: "JBL Party Box",
+    price: 9999,
     category: "Audio",
     img: "/images/speaker.jpg",
     description: "Portable speaker with deep bass and waterproof body."
@@ -26,7 +26,7 @@ const FALLBACK_PRODUCTS = [
   {
     id: 4,
     name: "Premium Leather Laptop Bag",
-    price: 2499,
+    price: 899,
     category: "Accessories",
     img: "/images/laptopbag.jpg",
     description: "Stylish leather bag fits laptops up to 15 inches."
@@ -34,7 +34,7 @@ const FALLBACK_PRODUCTS = [
   {
     id: 5,
     name: "Nike Running Shoes",
-    price: 4999,
+    price: 2199,
     category: "Footwear",
     img: "/images/shoe.jpg",
     description: "Lightweight cushioning for comfortable runs."
@@ -42,7 +42,7 @@ const FALLBACK_PRODUCTS = [
   {
     id: 6,
     name: "Canon DSLR Camera",
-    price: 45999,
+    price: 39999,
     category: "Cameras",
     img: "/images/camera.jpg",
     description: "High-resolution camera for enthusiasts and pros."
@@ -51,7 +51,7 @@ const FALLBACK_PRODUCTS = [
     id: 7,
     name: "Premium Belt",
     img: "/images/belt.png",
-    price: 1499,
+    price: 699,
     category: "Wearables",
     description: "Stylish durable everyday wear belt."
   }
@@ -95,7 +95,7 @@ const FALLBACK_PRODUCTS = [
     id: 12,
     name: "Spectacles",
     img: "/images/specs.png",
-    price: 3999,
+    price: 2499,
     category: "Wearables",
     description: "Lightweight stylish clear vision specs."
   }
@@ -104,10 +104,99 @@ const FALLBACK_PRODUCTS = [
     id: 13,
     name: "Watch",
     img: "/images/watch2.png",
-    price: 4999,
+    price: 1199,
     category: "Wearables",
     description: "Classic sleek analog wrist watch."
   },
+  {
+    id: 14,
+    name: "Backpack",
+    img: "/images/Backpack.jpeg",
+    price: 899,
+    category: "Accessories",
+    description: "A stylish multi-utility backpack perfect for travel, college, and daily use."
+  },
+  {
+    id: 15,
+    name: "Bracelet",
+    img: "/images/Bracelet.jpg",
+    price: 1999,
+    category: "Wearables",
+    description: "Elegant silver bracelet crafted for a timeless, minimal luxury look."
+  },
+  {
+    id: 16,
+    name: "Drone Camera",
+    img: "/images/Drone.jpg",
+    price: 1399,
+    category: "Camera",
+    description: "A high-performance camera drone built for stunning aerial shots and smooth flight."
+  },
+  {
+    id: 17,
+    name: "Sony Home Theatre Speaker",
+    img: "/images/Home Theatre Speaker.jpg",
+    price: 8999,
+    category: "Audio",
+    description: "4. Powerful surround sound system engineered for a theatre-like audio experience."
+  },
+  {
+    id: 18,
+    name: "Instant Camera",
+    img: "/images/Instant Camera.jpg",
+    price: 5999,
+    category: "Camera",
+    description: "Capture memories instantly with this cute, portable Instax mini camera."
+  },
+  {
+    id: 19,
+    name: "Military and Tactical Combat Boot",
+    img: "/images/Military and Tactical Combat Boot.jpg",
+    price: 3199,
+    category: "Footwear",
+    description: "6. Durable tactical boots designed for strength, comfort, and outdoor adventure."
+  },
+  {
+    id: 20,
+    name: "Portable Bluetooth Speaker",
+    img: "/images/bluetooth speaker.jpeg",
+    price: 649,
+    category: "Audio",
+    description: "Compact wireless speaker delivering powerful sound with deep bass, perfect for travel and outdoor use."
+  },
+  {
+    id: 21,
+    name: "Web Camera",
+    img: "/images/webcam.jpeg",
+    price: 2990,
+    category: "Camera",
+    description:"High-definition webcam that delivers clear video and audio for online classes, meetings, and streaming."
+  },
+  {
+    id: 22,
+    name: "Golden Hoop Earrings",
+    img: "/images/Earrings.jpeg",
+    price: 799,
+    category: "Accessories",
+    description: "Elegant everyday gold hoop earrings."
+  },
+    {
+    id: 23,
+    name: "Labubu",
+    img: "/images/labubu.jpg",
+    price: 2499,
+    category: "Accessories",
+    description: "Cute designer collectible character."
+  },
+    {
+    id: 24,
+    name: "Stanley Insulated Tumbler",
+    img: "/images/stanley.jpg",
+    price: 3999,
+    category: "Accessories",
+    description: "Premium insulated reusable tumbler."
+  }
+
 ];
 
 export default FALLBACK_PRODUCTS;
