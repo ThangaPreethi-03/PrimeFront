@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { useAuth } from "../App";
+
+import { useAuth } from "../context/AuthContext";
 
 export default function Wishlist() {
   const navigate = useNavigate();
