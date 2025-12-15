@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart, useAuth } from "../App";
+import { useCart } from "../App";
+import { useAuth } from "../context/AuthContext";
+
 import api from "../services/api";
 
 export default function PaymentPage() {
