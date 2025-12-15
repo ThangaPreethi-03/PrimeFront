@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { Routes, Route } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
 
 import LandingPage from "./pages/LandingPage";
 import Home from "./pages/Home";
@@ -34,9 +35,6 @@ import {
 /* ------------------ CONTEXT SETUP ------------------ */
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
-
-const AuthContext = createContext();
-export const useAuth = () => useContext(AuthContext);
 
 /* ------------------ HELPERS ------------------ */
 const getProductId = (p) => String(p?._id || p?.id || "");
