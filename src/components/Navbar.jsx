@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useCart, useAuth } from "../App";
+import { useCart } from "../App";
+import { useAuth } from "../context/AuthContext";
+
 import api from "../services/api";
 
 // PREMIUM RESPONSIVE NAVBAR (DESKTOP UNCHANGED, MOBILE POLISHED)
