@@ -7,7 +7,7 @@ export default function ProductCard({ product, onAdd }) {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // ✅ FIX 1: normalize IDs
+  // ✅ normalize IDs (unchanged)
   const userId = user?.id;
   const productId = product?._id || product?.id;
 
@@ -75,6 +75,17 @@ export default function ProductCard({ product, onAdd }) {
 
   return (
     <div className="product-card">
+      {/* ❤️ HEART — MOVED OUTSIDE IMAGE WRAPPER */}
+      <button
+        className={`wishlist-heart ${wish ? "active" : ""}`}
+        onClick={toggleWishlist}
+        disabled={loading}
+        title={wish ? "Remove from wishlist" : "Add to wishlist"}
+      >
+        ♥
+      </button>
+
+      {/* IMAGE */}
       <Link to={`/product/${productId}`} className="product-image-wrap">
         <img
           src={product.img}
@@ -82,17 +93,9 @@ export default function ProductCard({ product, onAdd }) {
           className="product-image"
           onError={(e) => (e.target.src = "/images/default.jpg")}
         />
-
-        <button
-          className={`wishlist-heart ${wish ? "active" : ""}`}
-          onClick={toggleWishlist}
-          disabled={loading}
-          title={wish ? "Remove from wishlist" : "Add to wishlist"}
-        >
-          ♥
-        </button>
       </Link>
 
+      {/* INFO */}
       <div className="product-info">
         <Link to={`/product/${productId}`} className="product-name">
           {product.name}
