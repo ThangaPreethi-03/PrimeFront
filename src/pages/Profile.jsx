@@ -4,6 +4,9 @@ import { useAuth } from "../App";
 
 export default function Profile() {
   const { user } = useAuth();
+if (!user?.id) {
+  return <h3>Please login to view profile</h3>;
+}
 
   const userId = user?._id || user?.id;
 
