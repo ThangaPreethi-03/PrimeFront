@@ -9,17 +9,21 @@ export default function OrderHistory() {
 
   const userId = user?.id || user?._id;
 
-  useEffect(() => {
-    if (!userId) return;
+useEffect(() => {
+  if (!user?.id) return;
 
-    api
-      .get(`/orders/user/${userId}`)
-      .then((res) => {
-        setOrders(res.data || []);
-      })
-      .catch(() => setOrders([]))
-      .finally(() => setLoading(false));
-  }, [userId]);
+  const fetchOrders = async () => {
+    try {
+      const res = await api.get(`/orders/user/${user.id}`);
+      setOrders(res.data || []);
+    } catch (err) {
+      console.error("Order fetch failed", err);
+    }
+  };
+
+  fetchOrders();
+}, [user]);
+
 
   if (!userId)
     return (
