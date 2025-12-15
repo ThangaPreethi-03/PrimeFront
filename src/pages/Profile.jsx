@@ -21,11 +21,12 @@ if (!user?.id) {
     const loadProfileData = async () => {
       try {
         // Wishlist
-        const wishlistRes = await api.get(`/users/${userId}/wishlist`);
+        const wishlistRes = await api.get(`/users/${user.id}/wishlist`);
         setWishlistCount(wishlistRes.data.length);
 
         // Orders
-        const ordersRes = await api.get(`/orders/user/${userId}`);
+        const ordersRes = await api.get(`/users/${user.id}`)
+
         setOrdersCount(ordersRes.data.length);
       } catch (err) {
         console.error("Profile load error:", err);
