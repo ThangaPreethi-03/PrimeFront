@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api, { getProductReviews, postProductReview } from "../services/api";
 import FALLBACK_PRODUCTS from "../data/AllProducts";
-import { useCart, useAuth } from "../App";
+import { useCart } from "../App";
+import { useAuth } from "../context/AuthContext";
+
 
 export default function ProductPage() {
   const { id } = useParams();
