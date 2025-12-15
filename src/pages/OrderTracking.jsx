@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useAuth } from "../App";
+import { useAuth } from "../context/AuthContext";
+
 import api from "../services/api";
 
 export default function OrderTracking() {
