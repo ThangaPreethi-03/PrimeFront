@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import api from "../services/api";
 import FALLBACK_PRODUCTS from "../data/AllProducts";
-import { useCart, useAuth } from "../App";
+import { useCart } from "../App";
+import { useAuth } from "../context/AuthContext";
+
 import ProductModal from "../components/ProductModal";
 
 export default function Home() {
