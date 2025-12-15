@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { useAuth } from "../App";
+
+import { useAuth } from "../context/AuthContext";
 
 export default function ProductCard({ product, onAdd }) {
   const { user } = useAuth();
