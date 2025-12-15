@@ -76,18 +76,20 @@ export default function App() {
   }, [token]);
 
   /* ------------------ CART PERSISTENCE ------------------ */
-  useEffect(() => {
-    if (user?.userId) {
-      const storedCart = loadCartFromStorage(user.userId);
-      setCart(storedCart || []);
-    }
-  }, [user?.userId]);
+/* ------------------ CART PERSISTENCE ------------------ */
+useEffect(() => {
+  if (user?.id) {
+    const stored = loadCartFromStorage(user.id);
+    setCart(stored || []);
+  }
+}, [user?.id]);
 
-  useEffect(() => {
-    if (user?.userId) {
-      saveCartToStorage(user.userId, cart);
-    }
-  }, [cart, user?.userId]);
+useEffect(() => {
+  if (user?.id) {
+    saveCartToStorage(user.id, cart);
+  }
+}, [cart, user?.id]);
+
 
   /* ------------------ CART FUNCTIONS ------------------ */
   const addToCart = (product, qty = 1) => {
@@ -162,13 +164,13 @@ export default function App() {
     setToken(tok);
   };
 
-  const logout = () => {
-    if (user?.userId) clearCartStorage(user.userId);
-    localStorage.removeItem("token");
-    setToken(null);
-    setUser(null);
-    setCart([]);
-  };
+const logout = () => {
+  if (user?.id) clearCartStorage(user.id);
+  localStorage.removeItem("token");
+  setToken(null);
+  setUser(null);
+  setCart([]);
+};
 
   const authValue = useMemo(
     () => ({ token, user, login, logout }),
