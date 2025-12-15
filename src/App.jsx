@@ -44,34 +44,40 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
 
-  const [token, setToken] = useState(localStorage.getItem("token"));
-  const [user, setUser] = useState(null);
+// App.jsx (AUTH PART ONLY)
 
-  /* ------------------ AUTH INIT ------------------ */
-  useEffect(() => {
-    if (!token) {
-      setUser(null);
-      return;
-    }
+const [token, setToken] = useState(
+  () => localStorage.getItem("token") || null
+);
 
-    try {
-      const decoded = JSON.parse(atob(token.split(".")[1]));
+const [user, setUser] = useState(null);
 
-      // ✅ CRITICAL FIX: CONSISTENT userId
-      setUser({
-        userId: decoded.id,
-        name: decoded.name,
-        email: decoded.email,
-        interests: decoded.interests || [],
-      });
+useEffect(() => {
+  if (!token) {
+    setUser(null);
+    return;
+  }
 
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
-    } catch (err) {
-      console.error("Invalid token", err);
-      localStorage.removeItem("token");
-      setUser(null);
-    }
-  }, [token]);
+  try {
+    const decoded = JSON.parse(atob(token.split(".")[1]));
+
+    // ✅ SINGLE SOURCE OF TRUTH
+    setUser({
+      id: decoded.id,          // <-- THIS FIXES EVERYTHING
+      name: decoded.name,
+      email: decoded.email,
+      interests: decoded.interests || [],
+    });
+
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } catch (err) {
+    console.error("Invalid token", err);
+    localStorage.removeItem("token");
+    setToken(null);
+    setUser(null);
+  }
+}, [token]);
+
 
   /* ------------------ CART PERSISTENCE ------------------ */
 /* ------------------ CART PERSISTENCE ------------------ */
