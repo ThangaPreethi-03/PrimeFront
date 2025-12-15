@@ -82,6 +82,8 @@ export default function Register({ onRegister }) {
         password,
         interests
       });
+localStorage.setItem("token", res.data.token);
+onLogin(res.data.token);
 
       if (res.data?.token) {
         onRegister(res.data.token);
