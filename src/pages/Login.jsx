@@ -63,13 +63,16 @@ export default function Login({ onLogin }) {
       const token = resp.data.token;
 
       // Save token
-      localStorage.setItem("token", token);
+
 
       // Apply token globally
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
       // Update App.jsx context
-      onLogin(token);
+
+
+      localStorage.setItem("token", res.data.token);
+onLogin(res.data.token);
 
       navigate("/");
     } catch (err) {
