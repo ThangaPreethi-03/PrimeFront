@@ -16,6 +16,7 @@ import Register from "./pages/Register";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import BillPage from "./pages/BillPage";
 import OrderHistory from "./pages/OrderHistory";
+import OrderDetails from "./pages/OrderDetails";
 import OrderTracking from "./pages/OrderTracking";
 import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
@@ -204,6 +205,8 @@ const logout = () => {
               <Route path="/checkout-success" element={<CheckoutSuccess />} />
               <Route path="/bill" element={<BillPage />} />
               <Route path="/orders" element={<OrderHistory />} />
+              <Route path="/orders/:invoiceNumber" element={<OrderDetails />} />
+
               <Route path="/orders/track" element={<OrderTracking />} />
             </Routes>
           </main>
