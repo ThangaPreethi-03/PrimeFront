@@ -24,8 +24,7 @@ export default function ProductCard({ product, onAdd }) {
       const res = await api.get(`/users/${userId}/wishlist`);
       const ids = res.data.map((w) => w.productId);
       setWish(ids.includes(productId));
-    } catch (err) {
-      console.error("Wishlist sync error:", err);
+    } catch {
       setWish(false);
     }
   };
@@ -37,7 +36,7 @@ export default function ProductCard({ product, onAdd }) {
       window.removeEventListener("wishlist-updated", syncWishlist);
   }, [userId, productId]);
 
-  /* ---------------- TOGGLE WISHLIST ---------------- */
+  /* ---------------- TOGGLE ---------------- */
   const toggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -53,9 +52,6 @@ export default function ProductCard({ product, onAdd }) {
     try {
       await api.post(`/users/${userId}/wishlist`, { productId });
       window.dispatchEvent(new Event("wishlist-updated"));
-    } catch (err) {
-      console.error("Wishlist toggle error:", err);
-      alert("Could not update wishlist");
     } finally {
       setLoading(false);
     }
@@ -63,25 +59,26 @@ export default function ProductCard({ product, onAdd }) {
 
   return (
     <div className="product-card">
-      {/* ❤️ HEART ICON */}
-      <button
-        className={`wishlist-heart ${wish ? "active" : ""}`}
-        onClick={toggleWishlist}
-        disabled={loading}
-        title={wish ? "Remove from wishlist" : "Add to wishlist"}
-      >
-        ♥
-      </button>
 
-      {/* IMAGE */}
-      <Link to={`/product/${productId}`} className="product-image-wrap">
-        <img
-          src={product.img}
-          alt={product.name}
-          className="product-image"
-          onError={(e) => (e.target.src = "/images/default.jpg")}
-        />
-      </Link>
+      {/* IMAGE + HEART OVERLAY */}
+      <div className="product-image-wrap">
+
+        <button
+          className={`wishlist-heart ${wish ? "active" : ""}`}
+          onClick={toggleWishlist}
+          title={wish ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          ♥
+        </button>
+
+        <Link to={`/product/${productId}`}>
+          <img
+            src={product.img}
+            alt={product.name}
+            className="product-image"
+          />
+        </Link>
+      </div>
 
       {/* INFO */}
       <div className="product-info">
