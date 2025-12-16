@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
-
 import { useAuth } from "../context/AuthContext";
 
 export default function ProductCard({ product, onAdd }) {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // ✅ normalize IDs (unchanged)
   const userId = user?.id;
   const productId = product?._id || product?.id;
 
   const [wish, setWish] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  /* ---------------- SYNC HEART ---------------- */
+  /* ---------------- SYNC WISHLIST ---------------- */
   const syncWishlist = async () => {
     if (!userId || !productId) {
       setWish(false);
@@ -39,7 +37,7 @@ export default function ProductCard({ product, onAdd }) {
       window.removeEventListener("wishlist-updated", syncWishlist);
   }, [userId, productId]);
 
-  /* ---------------- TOGGLE ---------------- */
+  /* ---------------- TOGGLE WISHLIST ---------------- */
   const toggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -49,25 +47,14 @@ export default function ProductCard({ product, onAdd }) {
       return;
     }
 
-    if (!productId) {
-      console.error("Invalid productId", product);
-      return;
-    }
-
     if (loading) return;
     setLoading(true);
 
     try {
-      await api.post(`/users/${userId}/wishlist`, {
-        productId,
-      });
-
+      await api.post(`/users/${userId}/wishlist`, { productId });
       window.dispatchEvent(new Event("wishlist-updated"));
     } catch (err) {
-      console.error(
-        "Wishlist toggle error:",
-        err.response?.data || err
-      );
+      console.error("Wishlist toggle error:", err);
       alert("Could not update wishlist");
     } finally {
       setLoading(false);
@@ -76,7 +63,7 @@ export default function ProductCard({ product, onAdd }) {
 
   return (
     <div className="product-card">
-      {/* ❤️ HEART — MOVED OUTSIDE IMAGE WRAPPER */}
+      {/* ❤️ HEART ICON */}
       <button
         className={`wishlist-heart ${wish ? "active" : ""}`}
         onClick={toggleWishlist}
@@ -102,9 +89,7 @@ export default function ProductCard({ product, onAdd }) {
           {product.name}
         </Link>
 
-        <div className="product-category">
-          {product.category}
-        </div>
+        <div className="product-category">{product.category}</div>
 
         <div className="product-bottom">
           <div className="product-price">
