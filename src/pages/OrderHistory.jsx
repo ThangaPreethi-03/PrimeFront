@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 export default function OrderHistory() {
   const { user } = useAuth();
   const userId = user?.id;
+  const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,30 +32,36 @@ export default function OrderHistory() {
     fetchOrders();
   }, [userId]);
 
-  if (!userId) {
-    return <p>Please login to see your orders.</p>;
-  }
-
-  if (loading) {
-    return <p>Loading your orders...</p>;
-  }
-
-  if (orders.length === 0) {
-    return <p>You haven't placed any orders yet.</p>;
-  }
+  if (!userId) return <p>Please login to see your orders.</p>;
+  if (loading) return <p>Loading your orders...</p>;
 
   return (
     <div className="container">
       <h2>My Orders</h2>
 
-      {orders.map((o) => (
-        <div key={o._id} className="order-card-premium">
-          <h4>Invoice: {o.invoiceNumber}</h4>
-          <p>Status: {o.status}</p>
-          <p>Total: ₹{o.total}</p>
-          <p>{new Date(o.createdAt).toLocaleString()}</p>
+      {orders.length === 0 ? (
+        <p>You haven't placed any orders yet.</p>
+      ) : (
+        <div className="orders-grid">
+          {orders.map((o) => (
+            <div
+              key={o._id}
+              className="order-card-premium clickable"
+              onClick={() =>
+                navigate(`/orders/${o.invoiceNumber}`)
+              }
+            >
+              <div className="order-header">
+                <h3>#{o.invoiceNumber}</h3>
+                <span>{o.status}</span>
+              </div>
+
+              <p>{new Date(o.createdAt).toLocaleString()}</p>
+              <p><strong>Total:</strong> ₹{o.total}</p>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }
