@@ -172,6 +172,37 @@
   font-weight: 900;
   color: #1e3a8a;
 }
+/* FORCE WISHLIST HEART VISIBILITY */
+.product-card .product-image-wrap {
+  position: relative;
+}
+
+.product-card .wishlist-heart {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffffee;
+  color: #e63946;
+  border: none;
+
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+}
+
+.product-card .wishlist-heart.active {
+  background: #e63946;
+  color: #fff;
+}
 
 /* =========================
    ADD BUTTON
