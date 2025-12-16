@@ -5,74 +5,47 @@ import FALLBACK_PRODUCTS from "../data/AllProducts";
 import { useCart } from "../App";
 import { useAuth } from "../context/AuthContext";
 
-import ProductModal from "../components/ProductModal";
-
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [maxPrice, setMaxPrice] = useState(100000);
-  const [modal, setModal] = useState(null);
 
   const { addToCart } = useCart();
   const { user } = useAuth();
 
   const interests = user?.interests || [];
-  const userId = user?._id || user?.id;
 
   /* ---------------- FETCH PRODUCTS ---------------- */
   useEffect(() => {
-    let active = true;
+    let alive = true;
 
     api
       .get("/products")
       .then((res) => {
-        if (active && Array.isArray(res.data) && res.data.length > 0) {
+        if (!alive) return;
+        if (Array.isArray(res.data) && res.data.length > 0) {
           setProducts(res.data);
         } else {
           setProducts(FALLBACK_PRODUCTS);
         }
       })
       .catch(() => {
-        if (active) setProducts(FALLBACK_PRODUCTS);
+        if (alive) setProducts(FALLBACK_PRODUCTS);
       });
 
-    return () => (active = false);
-  }, []);
-
-  /* ---------------- FETCH WISHLIST IDS ---------------- */
-  const [wishlistIds, setWishlistIds] = useState([]);
-
-  useEffect(() => {
-    if (!userId) {
-      setWishlistIds([]);
-      return;
-    }
-
-    const loadWishlist = () => {
-      api
-        .get(`/users/${userId}/wishlist`)
-        .then((res) => {
-          const ids = res.data.map((p) => p._id || p.id);
-          setWishlistIds(ids);
-        })
-        .catch(() => {});
+    return () => {
+      alive = false;
     };
-
-    loadWishlist();
-
-    // 🔥 keep in sync after add/remove
-    window.addEventListener("wishlist-updated", loadWishlist);
-
-    return () =>
-      window.removeEventListener("wishlist-updated", loadWishlist);
-  }, [userId]);
+  }, []);
 
   /* ---------------- CATEGORY LIST ---------------- */
   const categories = useMemo(() => {
     return [
       "All",
-      ...Array.from(new Set(products.map((p) => p.category || "Other"))),
+      ...Array.from(
+        new Set(products.map((p) => p.category || "Other"))
+      ),
     ];
   }, [products]);
 
@@ -95,25 +68,24 @@ export default function Home() {
   /* ---------------- AI RECOMMENDATIONS ---------------- */
   const recommended = useMemo(() => {
     if (!interests.length) return [];
-    return products.filter((p) => interests.includes(p.category));
+    return products.filter((p) =>
+      interests.includes(p.category)
+    );
   }, [products, interests]);
 
   return (
     <div className="container home-wide">
 
-      {/* ⭐ RECOMMENDED SECTION */}
+      {/* ⭐ RECOMMENDED */}
       {recommended.length > 0 && (
         <>
           <h2 className="section-title">Recommended for You ⭐</h2>
 
           <div className="product-grid premium-grid">
-            {recommended.map((p) => (
+            {recommended.map((product) => (
               <ProductCard
-                key={p._id || p.id}
-                product={{
-                  ...p,
-                  inWishlist: wishlistIds.includes(p._id || p.id),
-                }}
+                key={product._id || product.id}
+                product={product}
                 onAdd={addToCart}
               />
             ))}
@@ -125,16 +97,12 @@ export default function Home() {
             style={{
               padding: 20,
               borderRadius: 18,
-              marginTop: 30,
-              marginBottom: 30,
+              margin: "30px auto",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: 25,
-              flexWrap: "nowrap",
-              maxWidth: "900px",
-              marginLeft: "auto",
-              marginRight: "auto",
+              maxWidth: 900,
             }}
           >
             <input
@@ -142,29 +110,21 @@ export default function Home() {
               placeholder="Search products..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              style={{
-                width: "260px",
-                borderRadius: 10,
-                padding: "12px 14px",
-              }}
+              style={{ width: 260 }}
             />
 
             <select
               className="auth-input"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              style={{
-                width: "180px",
-                borderRadius: 10,
-                padding: "12px",
-              }}
+              style={{ width: 180 }}
             >
               {categories.map((c) => (
                 <option key={c}>{c}</option>
               ))}
             </select>
 
-            <div style={{ width: "260px" }}>
+            <div style={{ width: 260 }}>
               <label style={{ fontWeight: 700 }}>
                 Max Price:{" "}
                 {maxPrice === 100000
@@ -178,8 +138,10 @@ export default function Home() {
                 max="50000"
                 step="500"
                 value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                style={{ width: "100%", marginTop: 8 }}
+                onChange={(e) =>
+                  setMaxPrice(Number(e.target.value))
+                }
+                style={{ width: "100%" }}
               />
             </div>
           </div>
@@ -194,27 +156,15 @@ export default function Home() {
         </div>
 
         <div className="product-grid premium-grid">
-          {filtered.map((p) => (
+          {filtered.map((product) => (
             <ProductCard
-              key={p._id || p.id}
-              product={{
-                ...p,
-                inWishlist: wishlistIds.includes(p._id || p.id),
-              }}
-              onAdd={(prod) => addToCart(prod)}
+              key={product._id || product.id}
+              product={product}
+              onAdd={addToCart}
             />
           ))}
         </div>
       </section>
-
-      {/* PRODUCT MODAL */}
-      {modal && (
-        <ProductModal
-          product={modal}
-          onClose={() => setModal(null)}
-          onAdd={addToCart}
-        />
-      )}
     </div>
   );
 }
