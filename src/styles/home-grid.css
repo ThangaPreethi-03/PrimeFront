@@ -69,6 +69,10 @@
   overflow: hidden;
   z-index: 1; /* BELOW HEART */
 }
+.product-card {
+  position: relative;
+  overflow: visible !important;
+}
 
 /* ❤️ WISHLIST HEART — FINAL */
 .wishlist-heart {
@@ -224,7 +228,16 @@
   );
   font-weight: 800;
   box-shadow: 0 8px 22px rgba(255, 120, 30, 0.12);
+}/* 🔥 FORCE SHOW WISHLIST HEART (FINAL OVERRIDE) */
+.wishlist-heart {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
 }
+
+
 
 /* =========================
    RESPONSIVE
