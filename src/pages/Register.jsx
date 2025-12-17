@@ -17,7 +17,7 @@ export default function Register({ onRegister }) {
     "Footwear",
     "Accessories",
     "Cameras",
-    "Computers"
+    "Computers",
   ];
 
   const toggleInterest = (cat) => {
@@ -28,38 +28,29 @@ export default function Register({ onRegister }) {
     );
   };
 
-  // FRONTEND email format validation
   const validateEmailFormat = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleEmailBlur = async () => {
     setEmailError("");
-
     if (!email.trim()) return;
 
-    // 1) Basic format check like "abc@gmail.com"
     if (!validateEmailFormat(email)) {
       setEmailError("Invalid email format");
       return;
     }
 
     try {
-      // 2) Call BE: check domain + exists
       const res = await api.post("/auth/check-email", { email });
 
-      // 3) Domain does not exist
       if (!res.data.validDomain) {
         setEmailError("This email domain does not exist.");
         return;
       }
 
-      // 4) Email already registered
       if (res.data.exists) {
         setEmailError("This email is already registered.");
-        return;
       }
-
-      setEmailError("");
     } catch (err) {
       console.warn("Email check failed:", err);
     }
@@ -68,29 +59,29 @@ export default function Register({ onRegister }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateEmailFormat(email)) {
-      setEmailError("Invalid email format");
-      return;
-    }
-
-    if (emailError) return;
+    if (!validateEmailFormat(email) || emailError) return;
 
     try {
       const res = await api.post("/auth/register", {
         name,
         email,
         password,
-        interests
+        interests,
       });
-localStorage.setItem("token", res.data.token);
-onLogin(res.data.token);
 
-      if (res.data?.token) {
-        onRegister(res.data.token);
-        navigate("/");
-      } else {
+      if (!res.data?.token) {
         alert("Registration failed");
+        return;
       }
+
+      // ✅ SAVE TOKEN
+      localStorage.setItem("token", res.data.token);
+
+      // ✅ UPDATE CONTEXT
+      onRegister(res.data.token);
+
+      // ✅ REDIRECT
+      navigate("/shop");
     } catch (err) {
       alert(err.response?.data?.msg || "Register error");
     }
@@ -123,9 +114,7 @@ onLogin(res.data.token);
               onBlur={handleEmailBlur}
               required
             />
-            {emailError && (
-              <p className="error-text">{emailError}</p>
-            )}
+            {emailError && <p className="error-text">{emailError}</p>}
 
             <label>Password</label>
             <input
