@@ -8,20 +8,11 @@ export default function Login({ onLogin }) {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  /* -------------------------------
-      EMAIL FORMAT CHECK
-  -------------------------------- */
-  const validateFormat = (val) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(val.trim());
-  };
+  const validateFormat = (val) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
 
-  /* -------------------------------
-      ON BLUR → CHECK IF EMAIL EXISTS
-  -------------------------------- */
   const handleEmailBlur = async () => {
     setEmailError("");
-
     if (!email.trim()) return;
 
     if (!validateFormat(email)) {
@@ -31,8 +22,6 @@ export default function Login({ onLogin }) {
 
     try {
       const res = await checkEmailExists(email);
-
-      // If backend says "doesn't exist"
       if (!res.data.exists) {
         setEmailError("No account found with this email");
       }
@@ -41,9 +30,6 @@ export default function Login({ onLogin }) {
     }
   };
 
-  /* -------------------------------
-      LOGIN SUBMISSION
-  -------------------------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -53,28 +39,24 @@ export default function Login({ onLogin }) {
     }
 
     try {
-      const resp = await api.post("/auth/login", { email, password });
+      const res = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
-      if (!resp.data?.token) {
+      if (!res.data?.token) {
         alert("Login failed");
         return;
       }
 
-      const token = resp.data.token;
-
-      // Save token
-
-
-      // Apply token globally
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-      // Update App.jsx context
-
-
+      // ✅ SAVE TOKEN
       localStorage.setItem("token", res.data.token);
-onLogin(res.data.token);
 
-      navigate("/");
+      // ✅ UPDATE CONTEXT
+      onLogin(res.data.token);
+
+      // ✅ REDIRECT
+      navigate("/shop");
     } catch (err) {
       alert(err?.response?.data?.msg || "Login error");
     }
@@ -88,8 +70,6 @@ onLogin(res.data.token);
           <p className="auth-subtitle">Login to continue your shopping</p>
 
           <form className="auth-form" onSubmit={handleSubmit}>
-            
-            {/* EMAIL */}
             <label>Email</label>
             <input
               value={email}
@@ -101,11 +81,8 @@ onLogin(res.data.token);
               className={`auth-input ${emailError ? "input-error" : ""}`}
               required
             />
-            {emailError && (
-              <p className="error-text">{emailError}</p>
-            )}
+            {emailError && <p className="error-text">{emailError}</p>}
 
-            {/* PASSWORD */}
             <label>Password</label>
             <input
               type="password"
@@ -115,13 +92,11 @@ onLogin(res.data.token);
               required
             />
 
-            {/* BUTTON */}
             <button className="auth-btn" type="submit">
               Login
             </button>
           </form>
 
-          {/* REGISTER LINK */}
           <p className="auth-footer-text">
             Don't have an account?{" "}
             <span
