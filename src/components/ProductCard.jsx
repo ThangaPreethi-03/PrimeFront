@@ -13,6 +13,30 @@ export default function ProductCard({ product, onAdd }) {
   const [wish, setWish] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // ⭐ NEW: rating state
+  const [rating, setRating] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
+
+  /* ---------------- LOAD RATINGS ---------------- */
+  useEffect(() => {
+    if (!productId) return;
+
+    api
+      .get(`/reviews/product/${productId}`)
+      .then((res) => {
+        const reviews = res.data || [];
+        setReviewCount(reviews.length);
+
+        if (reviews.length > 0) {
+          const avg =
+            reviews.reduce((s, r) => s + r.rating, 0) /
+            reviews.length;
+          setRating(avg.toFixed(1));
+        }
+      })
+      .catch(() => {});
+  }, [productId]);
+
   /* ---------------- SYNC WISHLIST ---------------- */
   const syncWishlist = async () => {
     if (!userId || !productId) {
@@ -36,7 +60,7 @@ export default function ProductCard({ product, onAdd }) {
       window.removeEventListener("wishlist-updated", syncWishlist);
   }, [userId, productId]);
 
-  /* ---------------- TOGGLE ---------------- */
+  /* ---------------- TOGGLE WISHLIST ---------------- */
   const toggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -52,6 +76,8 @@ export default function ProductCard({ product, onAdd }) {
     try {
       await api.post(`/users/${userId}/wishlist`, { productId });
       window.dispatchEvent(new Event("wishlist-updated"));
+    } catch {
+      alert("Could not update wishlist");
     } finally {
       setLoading(false);
     }
@@ -59,25 +85,38 @@ export default function ProductCard({ product, onAdd }) {
 
   return (
     <div className="product-card">
+      {/* ❤️ Wishlist */}
+      <button
+        className={`wishlist-heart ${wish ? "active" : ""}`}
+        onClick={toggleWishlist}
+      >
+        ♥
+      </button>
 
-      {/* IMAGE + HEART OVERLAY */}
-      <div className="product-image-wrap">
+      {/* IMAGE */}
+      <Link to={`/product/${productId}`} className="product-image-wrap">
+        <img
+          src={product.img}
+          alt={product.name}
+          className="product-image"
+        />
+      </Link>
 
-        <button
-          className={`wishlist-heart ${wish ? "active" : ""}`}
-          onClick={toggleWishlist}
-          title={wish ? "Remove from wishlist" : "Add to wishlist"}
-        >
-          ♥
-        </button>
-
-        <Link to={`/product/${productId}`}>
-          <img
-            src={product.img}
-            alt={product.name}
-            className="product-image"
-          />
-        </Link>
+      {/* ⭐ RATING PREVIEW */}
+      <div className="product-rating-preview">
+        {reviewCount > 0 ? (
+          <>
+            <span className="stars">
+              {"★".repeat(Math.round(rating))}
+              {"☆".repeat(5 - Math.round(rating))}
+            </span>
+            <span className="rating-text">
+              {rating} ({reviewCount})
+            </span>
+          </>
+        ) : (
+          <span className="no-reviews">☆ No reviews yet</span>
+        )}
       </div>
 
       {/* INFO */}
@@ -86,7 +125,9 @@ export default function ProductCard({ product, onAdd }) {
           {product.name}
         </Link>
 
-        <div className="product-category">{product.category}</div>
+        <div className="product-category">
+          {product.category}
+        </div>
 
         <div className="product-bottom">
           <div className="product-price">
