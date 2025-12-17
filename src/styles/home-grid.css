@@ -265,3 +265,25 @@
     height: 220px;
   }
 }
+
+/* ===============================
+   FINAL WISHLIST HEART OVERRIDE
+   =============================== */
+
+/* override any button reset */
+.product-card .wishlist-heart,
+.product-image-wrap .wishlist-heart,
+button.wishlist-heart {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+}
+
+/* ensure parent allows visibility */
+.product-card {
+  position: relative !important;
+  overflow: visible !important;
+}
+
