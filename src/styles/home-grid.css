@@ -237,6 +237,29 @@
   z-index: 9999 !important;
 }
 
+/* ⭐ Rating preview on product card */
+.product-rating-preview {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.product-rating-preview .stars {
+  color: #fbbf24; /* gold */
+  letter-spacing: 1px;
+}
+
+.product-rating-preview .rating-text {
+  font-weight: 600;
+  color: #444;
+}
+
+.product-rating-preview .no-reviews {
+  color: #999;
+  font-size: 13px;
+}
 
 
 /* =========================
