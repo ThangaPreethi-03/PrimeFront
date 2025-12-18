@@ -63,9 +63,13 @@ export function verifyPayment(payload) {
 }
 
 /* REVIEWS */
+/* REVIEWS */
 export function getProductReviews(productId) {
   return api.get(`/reviews/product/${productId}`);
 }
-export function postProductReview(productId, review) {
-  return api.post(`/reviews/product/${productId}`, review);
+
+export function postProductReview(review) {
+  // productId must be inside review body
+  return api.post("/reviews", review);
 }
+
