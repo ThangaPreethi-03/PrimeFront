@@ -74,7 +74,7 @@ export default function ProductPage() {
     };
 
     try {
-      await postProductReview(id, payload);
+      await postProductReview(payload);
 
       // Always sync UI with DB
       const updated = await getProductReviews(id);
