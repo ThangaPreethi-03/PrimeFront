@@ -6,7 +6,6 @@ import FALLBACK_PRODUCTS from "../data/AllProducts";
 import { useCart } from "../App";
 import { useAuth } from "../context/AuthContext";
 
-
 export default function ProductPage() {
   const { id } = useParams();
   const { addToCart } = useCart();
@@ -19,6 +18,9 @@ export default function ProductPage() {
   const [newRating, setNewRating] = useState(5);
   const [loading, setLoading] = useState(true);
 
+  /* ===============================
+     FETCH PRODUCT
+  ================================ */
   useEffect(() => {
     let mounted = true;
     setLoading(true);
@@ -36,52 +38,80 @@ export default function ProductPage() {
     return () => (mounted = false);
   }, [id]);
 
+  /* ===============================
+     FETCH REVIEWS
+  ================================ */
   useEffect(() => {
     let mounted = true;
+
     getProductReviews(id)
       .then((res) => {
         if (!mounted) return;
         setReviews(Array.isArray(res.data) ? res.data : []);
       })
-      .catch(() => {
-        // if backend missing, keep client-only reviews (no-op)
+      .catch((err) => {
+        console.error("Fetch reviews error:", err);
       });
+
     return () => (mounted = false);
   }, [id]);
 
+  /* ===============================
+     SUBMIT REVIEW
+  ================================ */
   const submitReview = async () => {
-    if (!newText.trim()) return alert("Please write a review.");
+    if (!newText.trim()) {
+      alert("Please write a review.");
+      return;
+    }
+
     const payload = {
+      productId: id,
       userId: userId || null,
-      name: user?.name || "Guest",
+      userName: user?.name || "Guest",
       rating: newRating,
-      text: newText,
-      createdAt: new Date().toISOString(),
+      comment: newText,
     };
 
     try {
-      const resp = await postProductReview(id, payload);
-      // server returns saved review; append
-      const saved = resp.data;
-      setReviews((s) => [saved, ...s]);
+      await postProductReview(id, payload);
+
+      // Always sync UI with DB
+      const updated = await getProductReviews(id);
+      setReviews(Array.isArray(updated.data) ? updated.data : []);
+
       setNewText("");
       setNewRating(5);
     } catch (err) {
-      console.error("Review save failed, adding locally", err);
-      // fallback: keep local only
-      setReviews((s) => [{ ...payload, _id: Math.random().toString(36).slice(2) }, ...s]);
-      setNewText("");
-      setNewRating(5);
+      console.error("Review save failed:", err);
+      alert("Failed to save review. Please try again.");
     }
   };
 
-  if (loading || !product) return <div style={{ padding: 24 }}>Loading product...</div>;
+  if (loading || !product) {
+    return <div style={{ padding: 24 }}>Loading product...</div>;
+  }
 
-  const avg = reviews.length ? Math.round(reviews.reduce((s,r)=>s + (r.rating||0),0)/reviews.length) : 0;
+  /* ===============================
+     UTILS
+  ================================ */
+  const avg =
+    reviews.length > 0
+      ? Math.round(
+          reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
+        )
+      : 0;
 
   const renderStars = (rating) =>
-    [...Array(5)].map((_, i) => <span key={i} className="stars">{i < rating ? "★" : "☆"}</span>);
+    [...Array(5)].map((_, i) => (
+      <span key={i} className="stars">
+        {i < rating ? "★" : "☆"}
+      </span>
+    ));
 
+  /* ===============================
+     UI
+  ================================ */
   return (
     <div className="product-page container">
       <div className="product-page-inner">
@@ -94,38 +124,65 @@ export default function ProductPage() {
           <p className="muted">Category: {product.category}</p>
 
           <div style={{ margin: "8px 0" }}>
-            {renderStars(avg)} <span style={{ marginLeft: 8 }}>({reviews.length} reviews)</span>
+            {renderStars(avg)}
+            <span style={{ marginLeft: 8 }}>
+              ({reviews.length} reviews)
+            </span>
           </div>
 
           <h2>₹{product.price.toLocaleString()}</h2>
           <p>{product.description || "High quality product."}</p>
 
           <div style={{ marginTop: 12 }}>
-            <button className="btn" onClick={() => addToCart(product)}>Add to Cart</button>
+            <button className="btn" onClick={() => addToCart(product)}>
+              Add to Cart
+            </button>
           </div>
         </div>
       </div>
 
-      {/* reviews */}
+      {/* ===============================
+         REVIEWS SECTION
+      ================================ */}
       <div className="review-section">
         <h2>Customer Reviews</h2>
 
-        {reviews.map((rev, idx) => (
-          <div key={rev._id || idx} className="review-item">
+        {reviews.length === 0 && (
+          <p className="muted">No reviews yet.</p>
+        )}
+
+        {reviews.map((rev) => (
+          <div key={rev._id} className="review-item">
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div style={{ fontWeight: 700 }}>{rev.name || "Guest"}</div>
-              <div className="muted">{new Date(rev.createdAt || rev.date || Date.now()).toLocaleString()}</div>
+              <div style={{ fontWeight: 700 }}>
+                {rev.userName || "Guest"}
+              </div>
+              <div className="muted">
+                {new Date(rev.createdAt).toLocaleString()}
+              </div>
             </div>
-            <div style={{ marginTop: 6 }}>{renderStars(rev.rating || 0)}</div>
-            <div style={{ marginTop: 6 }}>{rev.text}</div>
+
+            <div style={{ marginTop: 6 }}>
+              {renderStars(rev.rating || 0)}
+            </div>
+
+            <div style={{ marginTop: 6 }}>
+              {rev.comment}
+            </div>
           </div>
         ))}
 
+        {/* ===============================
+           ADD REVIEW
+        ================================ */}
         <div className="add-review-box">
           <h3>Add Your Review</h3>
 
           <label>Rating</label>
-          <select value={newRating} onChange={(e) => setNewRating(Number(e.target.value))}>
+          <select
+            value={newRating}
+            onChange={(e) => setNewRating(Number(e.target.value))}
+          >
             <option value={5}>★★★★★</option>
             <option value={4}>★★★★☆</option>
             <option value={3}>★★★☆☆</option>
@@ -133,9 +190,15 @@ export default function ProductPage() {
             <option value={1}>★☆☆☆☆</option>
           </select>
 
-          <textarea placeholder="Write your review..." value={newText} onChange={(e)=>setNewText(e.target.value)} />
+          <textarea
+            placeholder="Write your review..."
+            value={newText}
+            onChange={(e) => setNewText(e.target.value)}
+          />
 
-          <button className="btn" onClick={submitReview}>Submit Review</button>
+          <button className="btn" onClick={submitReview}>
+            Submit Review
+          </button>
         </div>
       </div>
     </div>
